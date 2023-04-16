@@ -53,7 +53,6 @@ class ProcessOutputReader(QProcess):
         # only necessary when stderr channel isn't merged into stdout:
         self.readyReadStandardError.connect(self._ready_read_standard_error)
 
-
     @pyqtSlot()
     def _ready_read_standard_output(self):
 
@@ -181,24 +180,18 @@ class MyConsole(QTextEdit):
         self.exitGracefully()
 
     def keyPressEvent(self, event):
-        # if reader.state() == QProcess.NotRunning:
-        #     print("keypress detected: {} -> will close".format(event.key()))
-        #     self.exitGracefully()
-        # else:
-        if event.key() == 81:
+        if event.key() == 81:  # Q to quit
             print("key press {}: attempting to exit".format(event.key()))
             self.exitGracefully()
-            # self.close_on_finished_timeout = 0.0
-            # reader.kill()
-        elif event.key() in [72, 77]:
+        elif event.key() in [72, 77]:  # H or M to minimize
             print("key press {}: attempting to minimize".format(event.key()))
             self.showMinimized()
-        else:
+        elif event.key() == 32:  # spacebar to pause
             if self.counting_down_finished:
                 self.counting_down_finished = False
-                self.append_output("\n👆 Press [Q] to close")
-            else:
-                print("ignoring key press {}".format(event.key()))
+                self.append_output("\n👆[Q] to close\n")
+        else:
+            print("ignoring key press {}".format(event.key()))
 
     def hideEvent(self, event):
         self.showMinimized()
