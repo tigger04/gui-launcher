@@ -190,6 +190,13 @@ class MyConsole(QTextEdit):
             if self.counting_down_finished:
                 self.counting_down_finished = False
                 self.append_output("\n👆[Q] to close\n")
+            else:
+                if reader.state == QProcess.Suspended:
+                    self.append_output("\n▶️ resuming process\n")
+                    reader().resume()
+                else:
+                    self.append_output("\n⏸ attempting to suspend process\n")
+                    reader.suspend()
         else:
             print("ignoring key press {}".format(event.key()))
 
