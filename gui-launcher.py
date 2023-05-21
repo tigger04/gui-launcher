@@ -7,6 +7,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5 import QtCore
+
 # import sys
 import time
 import os
@@ -15,18 +16,19 @@ finished_timeout = 15  # default, set to -1 for no timeout (manual quit)
 
 
 def if_mac_set_menubar_title(title):
-    if sys.platform.startswith('darwin'):
+    if sys.platform.startswith("darwin"):
         # Set app name, if PyObjC is installed
         # Python 2 has PyObjC preinstalled
         # Python 3: pip3 install pyobjc-framework-Cocoa
         try:
             from Foundation import NSBundle
+
             bundle = NSBundle.mainBundle()
             if bundle:
                 app_name = title
                 app_info = bundle.localizedInfoDictionary() or bundle.infoDictionary()
                 if app_info:
-                    app_info['CFBundleName'] = app_name
+                    app_info["CFBundleName"] = app_name
         except ImportError:
             pass
 
@@ -55,7 +57,6 @@ class ProcessOutputReader(QProcess):
 
     @pyqtSlot()
     def _ready_read_standard_output(self):
-
         raw_bytes = self.readAllStandardOutput()
         text = self._decoder_stdout.toUnicode(raw_bytes)
 
@@ -74,7 +75,6 @@ class ProcessOutputReader(QProcess):
 
 
 class MyConsole(QTextEdit):
-
     def __init__(self, parent=None):
         self.__init__(parent=parent, timeout=int(finished_timeout))
 
@@ -91,11 +91,10 @@ class MyConsole(QTextEdit):
         self.setWindowOpacity(0.8)
         # self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
 
-        self.setStyleSheet(
-            "background-color: rgb(0, 0, 0); color: rgb(200,200,200);")
+        self.setStyleSheet("background-color: rgb(0, 0, 0); color: rgb(200,200,200);")
 
         self.setReadOnly(True)
-#        self.setMaximumBlockCount(10000)  # limit console to 10000 lines
+        #        self.setMaximumBlockCount(10000)  # limit console to 10000 lines
 
         self._cursor_output = self.textCursor()
 
@@ -106,19 +105,16 @@ class MyConsole(QTextEdit):
 
     @pyqtSlot(str)
     def append_output(self, text):
-        # self._cursor_output.insertText(text)
-        # self.scroll_to_last_line()
         tmp_newline = "///   #===newline===#   ///\n"
-        html = self.conv.convert(text.replace(
-            "\n", tmp_newline), full=False, ensure_trailing_newline=True)
+        html = self.conv.convert(text, full=False, ensure_trailing_newline=True)
+        html = html.replace(" ", "&nbsp;").replace("\n", "<br />")
 
-        self._cursor_output.insertHtml(html.replace(tmp_newline, "<br />"))
+        self._cursor_output.insertHtml(html)
         # self._cursor_output.insertText(html)
 
         self.scroll_to_last_line()
 
     def append_plaintext(self, text):
-
         self._cursor_output.insertText(text)
 
     def scroll_to_last_line(self):
@@ -130,7 +126,6 @@ class MyConsole(QTextEdit):
 
     # @pyqtSlot(str)
     def handleFinished(self, exitcode):
-
         self.setVisible(True)
         self.show()
         self.showNormal()
@@ -143,10 +138,10 @@ class MyConsole(QTextEdit):
             exitmoji = "🔴"
 
         self.append_output(
-            "\n{} Console got finished signal {}".format(exitmoji, exitcode))
+            "\n{} Console got finished signal {}".format(exitmoji, exitcode)
+        )
 
         if not wait_on_finished:
-
             self.append_output("\nClosing in ")
 
             proc_finish_time = time.time()
@@ -155,10 +150,11 @@ class MyConsole(QTextEdit):
 
             self.counting_down_finished = True
 
-            while time.time() < self.timeout_finish_time and self.counting_down_finished:
+            while (
+                time.time() < self.timeout_finish_time and self.counting_down_finished
+            ):
                 if time.time() >= proc_finish_time + count_seconds:
-                    remain_seconds = int(
-                        self.close_on_finished_timeout - count_seconds)
+                    remain_seconds = int(self.close_on_finished_timeout - count_seconds)
                     self.append_plaintext("{}..".format(remain_seconds))
                     count_seconds = count_seconds + 1.0
 
@@ -204,6 +200,8 @@ class MyConsole(QTextEdit):
         self.showMinimized()
 
         # keyPressEvent defined in child
+
+
 #        self.keyPressed.emit(event) # Emit is hidden in child
 
 
@@ -215,7 +213,7 @@ launcher_executable = cmd_line_args.pop(0)  # this is the python executable,
 ### get switches ###
 if cmd_line_args[0].startswith("-t"):
     _ = cmd_line_args.pop(0)
-    finished_timeout = int(''.join(filter(str.isdigit, cmd_line_args.pop(0))))
+    finished_timeout = int("".join(filter(str.isdigit, cmd_line_args.pop(0))))
 
 cmd_arg = cmd_line_args.pop(0)
 if cmd_arg == "--wait":
@@ -226,18 +224,21 @@ else:
     gui_executable = cmd_arg
 
 # application_name = os.path.splitext(gui_executable)[0]
-application_name = gui_executable.split('/')[-1]
+application_name = gui_executable.split("/")[-1]
 
-print("attempting to launch: {} with args: {} as {}".format(
-    gui_executable, cmd_line_args, application_name))
+print(
+    "attempting to launch: {} with args: {} as {}".format(
+        gui_executable, cmd_line_args, application_name
+    )
+)
 
 if_mac_set_menubar_title(application_name)
 
 # create the application instance
 app = QApplication(sys.argv)
 screensize = app.primaryScreen().size()
-myWidth = (screensize.width()/3)
-myHeight = (screensize.height()*2/3)
+myWidth = screensize.width() / 2
+myHeight = screensize.height() * 2 / 3
 
 # create a process output reader
 reader = ProcessOutputReader()
@@ -258,5 +259,5 @@ app.aboutToQuit.connect(console.exitGracefully)
 
 reader.start(gui_executable, cmd_line_args)  # start the process
 console.setWindowTitle(application_name)
-console.show()             # make the console visible
-app.exec_()                # run the PyQt main loop
+console.show()  # make the console visible
+app.exec_()  # run the PyQt main loop
