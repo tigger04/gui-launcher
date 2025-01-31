@@ -11,5 +11,3 @@ ansi2html = ">=1.9.2"
 
 [dev-packages]
 
-[requires]
-python_version = ">=3.13"
