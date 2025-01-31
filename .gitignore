@@ -23,7 +23,6 @@ wheels/
 share/python-wheels/
 *.egg-info/
 .installed.cfg
-pyvenv.cfg
 *.egg
 MANIFEST
 
@@ -173,3 +172,8 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+pyvenv.cfg
+include/
+bin/
+lib/
