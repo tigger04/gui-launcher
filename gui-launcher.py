@@ -43,8 +43,7 @@ class ProcessOutputReader(QProcess):
         super().__init__(parent=parent)
 
         # merge stderr channel into stdout channel
-        # self.setProcessChannelMode(QProcess.MergedChannels)
-        self.setProcessChannelMode(QProcess.SeparateChannels)
+        self.setProcessChannelMode(QProcess.MergedChannels)
 
         # prepare decoding process' output to Unicode
         codec = QTextCodec.codecForLocale()
